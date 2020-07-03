@@ -9,35 +9,43 @@ import (
 func separatorStruct(lens reflect.Value) string {
 	fieldCount := lens.NumField()
 
-	s := "+"
+	s := join
 	for i := 0; i < fieldCount; i++ {
 		fieldLen := int(lens.Field(i).Int())
 		for j := 0; j < int(fieldLen); j++ {
-			s = s + "-"
+			s = s + horizontal
 		}
-		s = s + "+"
+		s = s + join
 	}
 	return s
 }
 
-func printTitle(values []interface{}, l reflect.Value) {
-	title := "|"
-	row := reflect.ValueOf(values[0])
-	for i := 0; i < row.NumField(); i++ {
-		n := row.Type().Field(i).Name
-		disp := row.Type().Field(i).Tag.Get("tablify")
-		if disp == "" {
-			title = title + padForLength(n, int(l.FieldByName(n).Int())) + "|"
-		} else {
-			title = title + padForLength(disp, int(l.FieldByName(n).Int())) + "|"
-		}
+// fieldTitle gets the name that should appear at the top of the column. If the struct
+// field has a `tablify` tag attached, this will be used instead of the field name.
+//
+// Returns two values, `name` and `preferred`.
+func fieldTitle(field reflect.StructField) (string, string) {
+	if field.Tag.Get("tablify") != "" {
+		return field.Name, field.Tag.Get("tablify")
 	}
 
-	fmt.Println(title)
+	return field.Name, field.Name
+}
+
+func printTitle(values []interface{}, l reflect.Value) {
+	t := vertical
+	row := reflect.ValueOf(values[0])
+	for i := 0; i < row.NumField(); i++ {
+
+		n, p := fieldTitle(row.Type().Field(i))
+		t = t + padForLength(p, int(l.FieldByName(n).Int())) + vertical
+	}
+
+	fmt.Println(t)
 }
 
 func printRow(value interface{}, l reflect.Value) {
-	val := "|"
+	val := vertical
 	row := reflect.ValueOf(value)
 	for i := 0; i < row.NumField(); i++ {
 		v := row.Field(i).String()
@@ -45,7 +53,7 @@ func printRow(value interface{}, l reflect.Value) {
 			v = strconv.Itoa(int(row.Field(i).Int()))
 		}
 		n := row.Type().Field(i).Name
-		val = val + padForLength(v, int(l.FieldByName(n).Int())) + "|"
+		val = val + padForLength(v, int(l.FieldByName(n).Int())) + vertical
 	}
 
 	fmt.Println(val)

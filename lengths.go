@@ -22,13 +22,8 @@ func lengths(values []interface{}) reflect.Value {
 
 	// Set the initial value to be the length of the field name + 2
 	for i := 0; i < fieldCount; i++ {
-		n := s.Type().Field(i).Name
-		disp := s.Type().Field(i).Tag.Get("tablify")
-		if disp == "" {
-			fin.FieldByName(n).SetInt(int64(len(n) + 2))
-		} else {
-			fin.FieldByName(n).SetInt(int64(len(disp) + 2))
-		}
+		n, p := fieldTitle(s.Type().Field(i))
+		fin.FieldByName(n).SetInt(int64(len(p) + 2))
 	}
 
 	// Iterate through field values and set the length to be the length of it, if greater
