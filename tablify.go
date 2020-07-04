@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func separatorStruct(lens reflect.Value) string {
+func createSeparator(lens reflect.Value) string {
 	fieldCount := lens.NumField()
 
 	s := join
@@ -32,9 +32,9 @@ func fieldTitle(field reflect.StructField) (string, string) {
 	return field.Name, field.Name
 }
 
-func printTitle(values []interface{}, l reflect.Value) {
+func printTitle(values interface{}, l reflect.Value) {
 	t := vertical
-	row := reflect.ValueOf(values[0])
+	row := reflect.ValueOf(values)
 	for i := 0; i < row.NumField(); i++ {
 
 		n, p := fieldTitle(row.Type().Field(i))
@@ -52,6 +52,13 @@ func printRow(value interface{}, l reflect.Value) {
 		if row.Field(i).Kind() == reflect.Int {
 			v = strconv.Itoa(int(row.Field(i).Int()))
 		}
+		if row.Field(i).Kind() == reflect.Bool {
+			if row.Field(i).Bool() {
+				v = "true"
+			} else {
+				v = "false"
+			}
+		}
 		n := row.Type().Field(i).Name
 		val = val + padForLength(v, int(l.FieldByName(n).Int())) + vertical
 	}
@@ -60,13 +67,14 @@ func printRow(value interface{}, l reflect.Value) {
 }
 
 func PrintRowsStruct(values []interface{}) {
-	if len(values) == 0 {
-		fmt.Println("Unable to render table. No data exists.")
+	if !validate(values) {
 		return
 	}
-	l := lengths(values)
-	sep := separatorStruct(l)
 
+	l := lengths(values)
+	sep := createSeparator(l)
+
+	// Start the table.
 	fmt.Println(sep)
 
 	vs := make([]interface{}, len(values))
@@ -74,13 +82,14 @@ func PrintRowsStruct(values []interface{}) {
 		vs[i] = v
 	}
 
-	printTitle(vs, l)
+	printTitle(vs[0], l)
 
 	for _, v := range values {
 		fmt.Println(sep)
 		printRow(v, l)
 	}
 
+	// End the table.
 	fmt.Println(sep)
 }
 
@@ -96,4 +105,13 @@ func padForLength(value string, length int) string {
 	}
 
 	return value
+}
+
+func validate(values []interface{}) bool {
+	if len(values) == 0 {
+		fmt.Println("Unable to render table. No data exists.")
+		return false
+	}
+
+	return true
 }

@@ -39,6 +39,13 @@ func lengths(values []interface{}) reflect.Value {
 				valLen = int64(len(val.Field(i).String()) + 2)
 			case reflect.Int:
 				valLen = int64(len(strconv.Itoa(int(val.Field(i).Int()))) + 2)
+			case reflect.Bool:
+				f := val.Field(i).Bool()
+				if f {
+					valLen = 6 // ` True `
+				} else {
+					valLen = 7 // ` False `
+				}
 			}
 
 			if valLen > fin.FieldByName(k).Int() {
