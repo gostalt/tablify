@@ -1,7 +1,7 @@
 package tablify
 
 const (
-	vertical   string = "|"
-	horizontal string = "="
-	join       string = "±"
+	horizontalDefault string = "="
+	verticalDefault   string = "|"
+	joinDefault       string = "±"
 )

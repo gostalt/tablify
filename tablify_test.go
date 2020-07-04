@@ -4,23 +4,22 @@ import (
 	"testing"
 )
 
+var s = []struct {
+	Name   string
+	Height int
+}{
+	{Name: "Thomas", Height: 72},
+	{Name: "Lucy", Height: 65},
+}
+
+func TestCreateInstance(t *testing.T) {
+	tb := New()
+	tb.Struct(s)
+}
+
 func TestCreateLengthStruct(t *testing.T) {
-	s := []struct {
-		Name   string
-		Height int
-	}{
-		{Name: "Thomas", Height: 72},
-		{Name: "Lucy", Height: 65},
-	}
-
-	// An []slice of something doesn't satisfy a slice of interfaces,
-	// so we need to explicity create one here before passing to lengths.
-	g := make([]interface{}, len(s))
-	for i, v := range s {
-		g[i] = v
-	}
-
-	l := lengths(g)
+	vals := interfaceToInterfaceSlice(s)
+	l := lengths(vals)
 
 	nameLen := l.FieldByName("Name").Int()
 	if nameLen != 8 {
